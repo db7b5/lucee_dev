@@ -1,0 +1,63 @@
+version: '3.3'
+services: 
+  msdb:
+    container_name: mssqlserver
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "1433:1433"
+
+    environment:
+      SA_PASSWORD: "tk421931#"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+
+    networks:
+      - lucee_net
+    volumes:
+      - my-sqldb:/var/opt/mssql
+      - ./backup:/var/opt/backups
+
+  db:
+    container_name: mysqlserver
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'district'
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: 'dbuser'
+      # You can use whatever password you like
+      MYSQL_PASSWORD: 'tk421#'
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: 'tk421#'
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - '3306:3306'
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
+      # Where our data will be persisted
+    volumes:
+      - my-db:/var/lib/mysql
+    networks:
+      - lucee_net
+  lucee:
+    depends_on:
+      - msdb
+    container_name: lucee
+    image: lucee/lucee:5.3-nginx
+    restart: always
+    ports:
+      - '80:8888'   
+        
+    volumes:
+      - './www/:/var/www'
+      - './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
+    networks:
+      - lucee_net
+networks:
+  lucee_net:
+    driver: bridge
+# Names our volume
+volumes:
+  my-db:
+  my-sqldb:
