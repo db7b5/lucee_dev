@@ -7,11 +7,11 @@ networks:
 services:
   db:
     image: mariadb:latest
-    container_name: mariadb_dev
+    #container_name: mariadb_dev
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: 'tK421931.'
-      MYSQL_DATABASE: 'techwars'
+      MYSQL_DATABASE: 'TechWars'
       MYSQL_USER: 'lucee'      
       MYSQL_PASSWORD: 'lemLrv931.'
     ports:
@@ -50,13 +50,13 @@ services:
       - "8888:8888"
     volumes:
       - /home/dboehm/gitrepo/TechWars:/var/www/
-      - './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
+      #- './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
     depends_on:
       - db
     environment:
       DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: 'techwars'
+      DB_NAME: 'TechWars'
       DB_USER: 'lucee'
       DB_PASS: 'lemLrv931.'
     networks:
