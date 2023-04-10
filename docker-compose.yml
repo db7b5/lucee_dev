@@ -1,46 +1,63 @@
-version: '3.3'
-services: 
+version: '3'
+
+networks:
+  dev_net:
+    driver: bridge
+
+services:
   db:
-    container_name: mysqlserver
-    image: mysql:5.7
+    image: mariadb:latest
+    container_name: mariadb_dev
     restart: always
     environment:
-      MYSQL_DATABASE: 'district'
-      # So you don't have to use root, but you can if you like
-      MYSQL_USER: 'cfuser'
-      # You can use whatever password you like
-      MYSQL_PASSWORD: 'tk421#'
-      # Password for root access
-      MYSQL_ROOT_PASSWORD: 'tk421#'
+      MYSQL_ROOT_PASSWORD: 'tK421931.'
+      MYSQL_DATABASE: 'techwars'
+      MYSQL_USER: 'lucee'      
+      MYSQL_PASSWORD: 'lemLrv931.'
     ports:
       # <Port exposed> : < MySQL Port running inside container>
-      - '3306:3306'
-    expose:
-      # Opens port 3306 on the container
-      - '3306'
+      - '3306:3306'    
       # Where our data will be persisted
     volumes:
-      - my-db:/var/lib/mysql
+      - /home/dboehm/gitrepo/lucee_dev/database:/var/lib/mysql
     networks:
-      - lucee_net
-  lucee:
+      - dev_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma_dev
+    links:
+      - db
     depends_on:
-      - msdb
-    container_name: lucee
-    image: lucee/lucee:5.3-nginx
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY:     
+      PMA_USER: 'lucee'
+      PMA_PASSWORD: 'lemLrv931.'
     restart: always
     ports:
-      - '80:8888'   
-        
-    volumes:
-      - '/home/dboehm/gitrepo/:/var/www'
-      - './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
+      - 8081:80
     networks:
-      - lucee_net
-networks:
-  lucee_net:
-    driver: bridge
-# Names our volume
-volumes:
-  my-db:
-  my-sqldb:
+      - dev_net
+
+  lucee:
+    image: lucee/lucee:5.3-nginx
+    container_name: lucee_dev
+    restart: always
+    ports:
+      - "8888:8888"
+    volumes:
+      - /home/dboehm/gitrepo/TechWars:/var/www/
+      - './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: 'techwars'
+      DB_USER: 'lucee'
+      DB_PASS: 'lemLrv931.'
+    networks:
+      - dev_net
