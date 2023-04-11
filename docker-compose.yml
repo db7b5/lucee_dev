@@ -5,10 +5,10 @@ networks:
     driver: bridge
 
 services:
-  db:
+  mariadb:
     image: mariadb:latest
-    #container_name: mariadb_dev
-    restart: always
+    #container_name: mariadb
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 'tK421931.'
       MYSQL_DATABASE: 'techwars'
@@ -25,17 +25,19 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: pma_dev
+    #container_name: pma_dev
    
     depends_on:
-      - db
+      - mariadb
+    links:
+      - mariadb
     environment:
-      PMA_HOST: db
+      PMA_HOST: mariadb
       PMA_PORT: 3306
       PMA_ARBITRARY:     
       PMA_USER: 'lucee'
       PMA_PASSWORD: 'lemLrv931.'
-    restart: always
+    restart: unless-stopped
     ports:
       - 8081:80
     networks:
@@ -43,17 +45,17 @@ services:
 
   lucee:
     image: lucee/lucee:5.3-nginx
-    container_name: lucee_dev
-    restart: always
+    #container_name: lucee_dev
+    restart: unless-stopped
     ports:
       - "8888:8888"
     volumes:
       - /home/dboehm/gitrepo/TechWars:/var/www/
       #- './password.txt:/opt/lucee/server/lucee-server/context/password.txt'
     depends_on:
-      - db
+      - mariadb
     environment:
-      DB_HOST: db
+      DB_HOST: mariadb
       DB_PORT: 3306
       DB_NAME: 'techwars'
       DB_USER: 'lucee'
